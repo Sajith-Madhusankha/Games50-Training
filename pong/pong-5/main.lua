@@ -134,3 +134,36 @@ function love.keypressed(key)
         end
     end
 end
+
+--[[
+    Called after update by LÖVE2D, used to draw anything to the screen,
+    updated or otherwise.
+]]
+function love.draw()
+    -- begin rendering at virtual resolution
+    push:apply('start')
+
+    -- clear the screen with a specific color; in this case, a color similar
+    -- to some versions of the original Pong
+    love.graphics.clear(40/255, 45/255, 52/255, 255/255)
+
+    -- draw different things based on the state of the game
+    love.graphics.setFont(smallFont)
+
+    if gameState == 'start' then
+        love.graphics.printf('Hello Start State!', 0, 20, VIRTUAL_WIDTH, 'center')
+    else
+        love.graphics.printf('Hello Play State!', 0, 20, VIRTUAL_WIDTH, 'center')
+    end
+
+    -- render paddles, now using their class's render method
+    player1:render()
+    player2:render()
+
+    --render ball using it's class's render method
+    ball:render()
+
+    -- end rendering at virual resolution
+    push:apply('end')
+
+end
