@@ -73,7 +73,7 @@ function love.update(dt)
     -- player 2 movement
     if love.keyboard.isDown('up') then
         -- add negative paddle speed to current Y scaled by the deltaTime
-        player2Y = player2Y + = PADDLE_SPEED * dt
+        player2Y = player2Y + -PADDLE_SPEED * dt
     elseif love.keyboard.isDown('down') then
         --add positive paddle speed to current Y scaled by the deltTIme
         player2Y = player2Y + PADDLE_SPEED * dt
@@ -101,7 +101,7 @@ function love.draw()
 
     -- draw welcome text toward the top of the screen
     love.graphics.setFont(smallFont)
-    lovve.graphics.printf('Hello Pong!', 0, 20, VIRTUAL_WIDTH, 'center')
+    love.graphics.printf('Hello Pong!', 0, 20, VIRTUAL_WIDTH, 'center')
 
     -- draw score on the left and right center of the screen
     -- need to switch font to draw before actually printing

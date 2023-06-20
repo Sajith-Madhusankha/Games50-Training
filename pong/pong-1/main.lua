@@ -39,7 +39,7 @@ end
     Keyboard handling, calledby LÖVE2D each frame;
     passes in the key we pressed so we can access.
 ]]
-function loce.keypressed(key)
+function love.keypressed(key)
     -- keys can be accessed by string name
     if key == 'escape' then
         --function LOVE gives us to terminate application
