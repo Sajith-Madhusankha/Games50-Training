@@ -182,7 +182,7 @@ function love.draw()
     love.graphics.print(tostring(player2Score), VIRTUAL_WIDTH / 2 + 30,
         VIRTUAL_HEIGHT / 3)
 
-    player1.render()
+    player1:render()
     player2:render()
 
     -- render ball (center)
