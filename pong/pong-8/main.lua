@@ -1,24 +1,37 @@
 --[[
+    GD50 2018
     Pong Remake
 
-    Pong-8
+    pong-8
     "The Score Update"
 
     -- Main Program --
+
+    Author: Colton Ogden
+    cogden@cs50.harvard.edu
+
+    Originally programmed by Atari in 1972. Features two
+    paddles, controlled by players, with the goal of getting
+    the ball past your opponent's edge. First to 10 points wins.
+
+    This version is built to more closely resemble the NES than
+    the original Pong machines or the Atari 2600 in terms of
+    resolution, though in widescreen (16:9) so it looks nicer on 
+    modern systems.
 ]]
 
 -- push is a library that will allow us to draw our game at a virtual
 -- resolution, instead of however large our window is; used to provide
 -- a more retro aesthetic
 --
---https://github.com/Ulydev/push
+-- https://github.com/Ulydev/push
 push = require 'push'
 
 -- the "Class" library we're using will allow us to represent anything in
--- our game as code, rather than keeping track of many disparate variables
--- and methods
+-- our game as code, rather than keeping track of many disparate variables and
+-- methods
 --
---https://github.com/vrld/hump/blob/master/class.lua
+-- https://github.com/vrld/hump/blob/master/class.lua
 Class = require 'class'
 
 -- our Paddle class, which stores position and dimensions for each Paddle
@@ -29,11 +42,9 @@ require 'Paddle'
 -- but which will mechanically function very differently
 require 'Ball'
 
--- size of our actual window
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
 
--- size we're trying to emulate with push
 VIRTUAL_WIDTH = 432
 VIRTUAL_HEIGHT = 243
 
@@ -44,23 +55,38 @@ PADDLE_SPEED = 200
     Runs when the game first starts up, only once; used to initialize the game.
 ]]
 function love.load()
+    -- set love's default filter to "nearest-neighbor", which essentially
+    -- means there will be no filtering of pixels (blurriness), which is
+    -- important for a nice crisp, 2D look
     love.graphics.setDefaultFilter('nearest', 'nearest')
 
+    -- set the title of our application window
     love.window.setTitle('Pong')
 
+    -- "seed" the RNG so that calls to random are always random
+    -- use the current time, since that will vary on startup every time
     math.randomseed(os.time())
 
+    -- more "retro-looking" font object we can use for any text
     smallFont = love.graphics.newFont('font.ttf', 8)
 
+    -- larger font for drawing the score on the screen
     scoreFont = love.graphics.newFont('font.ttf', 32)
 
+    -- set LÖVE2D's active font to the smallFont obect
     love.graphics.setFont(smallFont)
 
+    -- initialize window with virtual resolution
     push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
         fullscreen = false,
         resizable = false,
-        vsync =true
+        vsync = true
     })
+
+    -- initialize score variables, used for rendering on the screen and keeping
+    -- track of the winner
+    player1Score = 0
+    player2Score = 0
 
     -- initialize our player paddles; make them global so that they can be
     -- detected by other functions and modules
@@ -70,20 +96,20 @@ function love.load()
     -- place a ball in the middle of the screen
     ball = Ball(VIRTUAL_WIDTH / 2 - 2, VIRTUAL_HEIGHT / 2 - 2, 4, 4)
 
-    -- initialize score variables, used for rendering on the screen and keeping
-    -- track of the winner
-    player1Score = 0
-    player2Score = 0
-
+    -- game state variable used to transition between different parts of the game
+    -- (used for beginning, menus, main game, high score list, etc.)
+    -- we will use this to determine behavior during render and update
     gameState = 'start'
 end
 
 --[[
-    Runs every frame, with "dt" passed in, our delta in seconds
-    since the last frame, which LOVE2D supplies us.
+    Runs every frame, with "dt" passed in, our delta in seconds 
+    since the last frame, which LÖVE2D supplies us.
 ]]
 function love.update(dt)
     if gameState == 'play' then
+        -- detect ball collision with paddles, reversing dx if true and
+        -- slightly increasing it, then altering the dy based on the position of collision
         if ball:collides(player1) then
             ball.dx = -ball.dx * 1.03
             ball.x = player1.x + 5
@@ -95,7 +121,6 @@ function love.update(dt)
                 ball.dy = math.random(10, 150)
             end
         end
-
         if ball:collides(player2) then
             ball.dx = -ball.dx * 1.03
             ball.x = player2.x - 4
@@ -107,21 +132,21 @@ function love.update(dt)
                 ball.dy = math.random(10, 150)
             end
         end
-        
+
         -- detect upper and lower screen boundary collision and reverse if collided
-        if ball.dy <= 0 then
+        if ball.y <= 0 then
             ball.y = 0
             ball.dy = -ball.dy
         end
 
         -- -4 to account for the ball's size
-        if ball.dy >= VIRTUAL_HEIGHT - 4 then
+        if ball.y >= VIRTUAL_HEIGHT - 4 then
             ball.y = VIRTUAL_HEIGHT - 4
             ball.dy = -ball.dy
         end
     end
 
-    -- if we reach the left or right edge of the screen,
+    -- if we reach the left or right edge of the screen, 
     -- go back to start and update the score
     if ball.x < 0 then
         servingPlayer = 1
@@ -139,12 +164,8 @@ function love.update(dt)
 
     -- player 1 movement
     if love.keyboard.isDown('w') then
-        -- add negative paddle speed to current Y scaled by deltaTime
-        -- now, we clamp our position between the bounds of the screen
         player1.dy = -PADDLE_SPEED
     elseif love.keyboard.isDown('s') then
-        -- add positive paddle speed to current Y scaled by deltaTime
-        -- now, we clamp our position between the bounds of the screen
         player1.dy = PADDLE_SPEED
     else
         player1.dy = 0
@@ -152,12 +173,8 @@ function love.update(dt)
 
     -- player 2 movement
     if love.keyboard.isDown('up') then
-        -- add negative paddle speed to current Y scaled by deltaTime
-        -- now, we clamp our position between the bounds of the screen
         player2.dy = -PADDLE_SPEED
     elseif love.keyboard.isDown('down') then
-        -- add positive paddle speed to current Y scaled by deltaTime
-        -- now, we clamp our position between the bounds of the screen
         player2.dy = PADDLE_SPEED
     else
         player2.dy = 0
@@ -174,7 +191,7 @@ function love.update(dt)
 end
 
 --[[
-    Keyboard handling, called by LOVE2D each frame;
+    Keyboard handling, called by LÖVE2D each frame; 
     passes in the key we pressed so we can access.
 ]]
 function love.keypressed(key)
