@@ -1,4 +1,4 @@
-Bird = class{}
+Bird = Class{}
 
 local GRAVITY = 20
 
