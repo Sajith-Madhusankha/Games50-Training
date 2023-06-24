@@ -1,4 +1,4 @@
-Bird = class{}
+Bird = Class{}
 
 function Bird:init()
     self.image = love.graphics.newImage('bird.png')
